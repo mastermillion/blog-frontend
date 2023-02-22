@@ -9,6 +9,22 @@ const PostEditor = () => {
   // #5 Set up navigateTo so when the form is submitted, we have access to the router
   const navigateTo = useNavigate();
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const response = await fetch(`http://localhost:3001/authStatus`, {
+        credentials: "include",
+      });
+      const data = await response.json();
+
+      if (data.loggedIn) {
+      } else {
+        alert("Fluff off. Not Authorized");
+        navigateTo("/");
+      }
+    };
+    checkAuth();
+  }, []);
+
   // #7C Form has been submitted, run this function
   const addPost = async (event) => {
     // #8 Prevent the form from refreshing in the browser (default action)
@@ -17,31 +33,47 @@ const PostEditor = () => {
     //#9 Construct an object with four keys & values, the first three are extracting the values
     // in state and the last key/value pair is storing the current date & time into a key called
     //"timestamp"
-    const post = {
+    const postContent = {
       title, //shorthand of title: title (ie the key is "title" and the value from state is also called title)
       tagline,
       content,
-      timestamp: new Date(),
     };
 
     // #10 Check to make sure all the data (including all the form content and the time) are properly
     //stored in the object
-    console.log(post);
+    console.log(postContent);
 
-    const response = await fetch(`http://localhost:3001/post`, {
+    const response = await fetch(`http://localhost:3001/newPost`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(post),
+      body: JSON.stringify(postContent),
+      credentials: "include",
     });
     //#18 Use the navigate function from step #5 to navigate us back to the homepage using the router
+    navigateTo("/");
+  };
+
+  const logoutClicked = async () => {
+    await fetch("http://localhost:3001/logout", {
+      credentials: "include",
+    });
     navigateTo("/");
   };
 
   return (
     <div className="container">
       <h1>Post Editor</h1>
+      <span
+        style={{
+          textDecoration: "underline",
+          color: "blue",
+        }}
+        onClick={logoutClicked}
+      >
+        Logout
+      </span>
       {/* 7B Form is submitted, time to head to our JS function */}
       <form onSubmit={addPost}>
         <label>Title:</label>
